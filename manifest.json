@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "Alza Dni Kupónový Filter",
+    "version": "1.0",
+    "description": "Filter produktov na Alza počas Alza Dní podľa kupónových kódov",
+    "permissions": [
+      "activeTab"
+    ],
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "content_scripts": [
+      {
+        "js": ["content.js"]
+      }
+    ]
+  }
