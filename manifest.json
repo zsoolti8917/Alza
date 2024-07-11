@@ -11,7 +11,8 @@
     },
     "content_scripts": [
       {
-        "js": ["content.js"]
+        "matches": ["<all_urls>"],
+        "js": ["content.js", "enhancedLoading.js"]
       }
     ]
   }
