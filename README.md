@@ -38,6 +38,3 @@ Príspevky sú vítané! Ak máte nápady na zlepšenie alebo ste našli chybu, 
 
 Vytvoril [Zsolt Varjú](https://github.com/zsoolti8917)
          [LinkedIn](https://www.linkedin.com/in/zsoltvarju/)
-## Licencia
-
-Tento projekt je licencovaný pod [MIT License](LICENSE).
