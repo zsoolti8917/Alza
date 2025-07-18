@@ -1,13 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Alza Dni Kupónový Filter",
-  "version": "1.0",
-  "description": "Filter produktov na Alza počas Alza Dní podľa kupónových kódov",
+  "version": "2.0",
+  "description": "Pokročilý filter produktov na Alza počas Alza Dní podľa kupónových kódov s vlastnými percentami",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_title": "Alza Kupónový Filter"
   },
   "content_scripts": [
     {
@@ -15,7 +17,13 @@
         "https://www.alza.cz/*",
         "https://www.alza.sk/*"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
     }
+  ],
+  "host_permissions": [
+    "https://www.alza.cz/*",
+    "https://www.alza.sk/*"
   ]
 }

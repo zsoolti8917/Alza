@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <title>Alza Dni Kupónový Filter</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    h2, h3 {
+      text-align: center;
+    }
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      position: relative;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #resetButton {
+      background-color: #f44336;
+      width: 100%;
+      margin-top: 10px;
+    }
+    #resetButton:hover {
+      background-color: #d32f2f;
+    }
+    .mode-toggle {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .mode-toggle button {
+      background-color: #2196F3;
+    }
+    .mode-toggle button:hover {
+      background-color: #1976D2;
+    }
+    .active {
+      background-color: #1976D2 !important;
+    }
+    .filter-btn.selected {
+      background-color: #FF5722 !important;
+      box-shadow: 0 0 10px rgba(255, 87, 34, 0.5);
+      transform: scale(1.05);
+      border: 2px solid #FF9800;
+    }
+    .filter-btn.selected:hover {
+      background-color: #E64A19 !important;
+    }
+    .filter-btn.selected::after {
+      content: "✓";
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #4CAF50;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .tooltip {
+      visibility: hidden;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    button:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+    #infoButton {
+      background-color: #607D8B;
+      width: 100%;
+      margin-top: 10px;
+    }
+    #infoButton:hover {
+      background-color: #455A64;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .creator-info {
+      margin-top: 20px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    .creator-layout {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .creator-name {
+      font-weight: bold;
+      color: #2196F3;
+    }
+    .creator-links a {
+      color: #1976D2;
+      text-decoration: none;
+      margin-left: 10px;
+    }
+    .creator-links a:hover {
+      text-decoration: underline;
+    }
+    .custom-input-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+      gap: 5px;
+    }
+    .custom-input-container input {
+      width: 60px;
+      padding: 8px;
+      font-size: 14px;
+      border: 2px solid #4CAF50;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .custom-input-container input:focus {
+      outline: none;
+      border-color: #45a049;
+    }
+    .custom-input-container label {
+      font-size: 14px;
+      font-weight: bold;
+    }
+    #addCustomButton {
+      background-color: #FF9800;
+      margin-left: 5px;
+    }
+    #addCustomButton:hover {
+      background-color: #F57C00;
+    }
+    #applyFiltersButton {
+      background-color: #2196F3 !important;
+      font-size: 16px !important;
+      font-weight: bold !important;
+      padding: 12px 24px !important;
+      margin: 10px 0 !important;
+    }
+    #applyFiltersButton:hover {
+      background-color: #1976D2 !important;
+    }
+    #applyFiltersButton:disabled {
+      background-color: #9E9E9E !important;
+      cursor: not-allowed !important;
+      opacity: 0.6 !important;
+    }
+    .selected-filters-display {
+      background: rgba(33, 150, 243, 0.1);
+      border: 1px solid #2196F3;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      text-align: center;
+      font-size: 14px;
+      min-height: 20px;
+    }
+    .selected-filters-display.empty {
+      color: #666;
+      font-style: italic;
+    }
+    .debug-toggle {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: #9E9E9E;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .debug-toggle.active {
+      background: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <button id="debugToggle" class="debug-toggle">DEBUG</button>
+  
+  <h2>Filter podľa kupónového kódu</h2>
+  <div class="mode-toggle">
+    <button id="currentPageMode" class="active">
+      Aktuálna stránka
+      <span class="tooltip">Filtruje iba položky viditeľné na aktuálnej stránke</span>
+    </button>
+    <button id="loadAllMode">
+      Načítať všetko
+      <span class="tooltip">Načíta všetky položky a potom aplikuje filter</span>
+    </button>
+  </div>
+    <h3 id="modeIndicator">Filtrovanie: Aktuálna stránka</h3>
+    
+    <div class="glass-container">
+      <div class="selected-filters-display empty" id="selectedFiltersDisplay">
+        Žiadne filtre vybrané
+      </div>
+    </div>
+    
+    <div class="glass-container">
+      <div class="button-container">
+    <button class="filter-btn" data-code="5%">
+      5%
+      <span class="tooltip">Vyberte pre 5% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="10%">
+      10%
+      <span class="tooltip">Vyberte pre 10% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="15%">
+      15%
+      <span class="tooltip">Vyberte pre 15% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="20%">
+      20%
+      <span class="tooltip">Vyberte pre 20% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="25%">
+      25%
+      <span class="tooltip">Vyberte pre 25% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="30%">
+      30%
+      <span class="tooltip">Vyberte pre 30% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="35%">
+      35%
+      <span class="tooltip">Vyberte pre 35% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="50%">
+      50%
+      <span class="tooltip">Vyberte pre 50% zľavu</span>
+    </button>
+    <button class="filter-btn" data-code="75%">
+      75%
+      <span class="tooltip">Vyberte pre 75% zľavu</span>
+    </button>
+      </div>
+    </div>
+    
+    <div class="glass-container">
+      <div class="custom-input-container">
+    <label for="customPercentage">Vlastné %:</label>
+    <input type="number" id="customPercentage" min="1" max="99" placeholder="napr. 40">
+    <button id="addCustomButton">
+      Pridať
+      <span class="tooltip">Pridá vlastné percento k vybraným filtrom</span>
+    </button>
+  </div>
+  
+  <div style="text-align: center; margin: 15px 0;">
+    <button id="applyFiltersButton" style="background-color: #2196F3; font-size: 16px; font-weight: bold; padding: 12px 24px;">
+      🔍 Vyberte filtre
+      <span class="tooltip">Aplikuje všetky vybrané filtre</span>
+    </button>
+  </div>
+  
+  <button id="resetButton">
+    Zrušiť filter
+    <span class="tooltip">Odstráni všetky filtre a zobrazí všetky položky</span>
+  </button>
+  <button id="infoButton">Viac informácií</button>
+  
+  <div id="infoModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Informácie o aplikácii</h2>
+      <p>Táto aplikácia vám umožňuje filtrovať položky na webshope podľa kupónových kódov.</p>
+      <h3>Funkcie tlačidiel:</h3>
+      <ul>
+        <li><strong>Aktuálna stránka:</strong> Filtruje iba položky viditeľné na aktuálnej stránke.</li>
+        <li><strong>Načítať všetko:</strong> Načíta všetky položky a potom aplikuje filter.</li>
+        <li><strong>Tlačidlá so zľavami:</strong> Kliknite pre výber/zrušenie výberu. Vybrané tlačidlá sú oranžové so zeleným zaškrtnutím.</li>
+        <li><strong>Vlastné %:</strong> Zadajte číslo a kliknite "Pridať" pre pridanie vlastného filtra.</li>
+        <li><strong>Filtrovať tlačidlo:</strong> Aplikuje všetky vybrané filtre naraz.</li>
+        <li><strong>Zrušiť filter:</strong> Odstráni všetky filtre a zobrazí všetky položky.</li>
+      </ul>
+      <h3>Ako používať:</h3>
+      <ol>
+        <li>Vyberte režim filtrovania (Aktuálna stránka alebo Načítať všetko).</li>
+        <li>Kliknite na jedno alebo viacero tlačidiel so zľavami - aktívne tlačidlá budú oranžové a svietiť.</li>
+        <li>Môžete pridať vlastné percentá zadaním čísla a kliknutím "Pridať".</li>
+        <li>Aplikácia zobrazí všetky položky, ktoré majú AKÚKOĽVEK z vašich aktívnych zľav.</li>
+        <li>Pre odstránenie všetkých filtrov kliknite na tlačidlo "Zrušiť filter".</li>
+      </ol>
+      
+      <div class="creator-info">
+        <h3>O tvorcovi</h3>
+        <p>Túto aplikáciu vytvoril <span class="creator-name">Zsolt Varjú</span>.</p>
+        <div class="social-links">
+          <a href="https://www.linkedin.com/in/zsoltvarju/" target="_blank">LinkedIn</a>
+          <a href="https://github.com/zsoolti8917" target="_blank">GitHub</a>
+        </div>
+        <p>Kontakt: <a href="mailto:zsolt.varju.rl@gmail.com">zsolt.varju.rl@gmail.com</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="creator-info">
+    <div class="creator-layout">
+      <span class="creator-name">Vytvoril: Zsolt Varjú</span>
+      <div class="creator-links">
+        <a href="https://www.linkedin.com/in/zsoltvarju/" target="_blank">LinkedIn</a>
+        <a href="https://github.com/zsoolti8917" target="_blank">GitHub</a>
+        <a href="mailto:zsolt.varju.rl@gmail.com">Email</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
